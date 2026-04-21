@@ -10,9 +10,17 @@ const dbConfig = {
 const database = process.env.DB_NAME;
 
 async function setup() {
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS ${database}`);
-    await connection.close();
+    if (!dbConfig.host || !dbConfig.user) {
+        console.warn('DATABASE WARNING: Missing DB configuration. Backend will fail on DB queries.');
+        return;
+    }
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.query(`CREATE DATABASE IF NOT EXISTS ${database}`);
+        await connection.close();
+    } catch (err) {
+        console.warn('DATABASE NOTICE: Could not create/verify database automatically. Ensure it exists on your host.');
+    }
 }
 
 const pool = mysql.createPool({
@@ -20,11 +28,14 @@ const pool = mysql.createPool({
     database: database,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    // Add SSL support for cloud providers (Aiven, Railway, etc.)
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
 // Test connection and create tables if they don't exist
 async function initDB() {
+    if (!dbConfig.host) return;
     try {
         await setup();
         const connection = await pool.getConnection();

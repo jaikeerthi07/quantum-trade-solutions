@@ -320,6 +320,11 @@ app.get('/', (req, res) => {
     res.send('Quantum Trade API is online');
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-});
+// For Vercel Serverless Functions
+if (require.main === module) {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on http://0.0.0.0:${PORT}`);
+    });
+}
+
+module.exports = app;
