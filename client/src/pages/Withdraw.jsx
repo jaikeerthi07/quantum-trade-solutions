@@ -51,8 +51,9 @@ const Withdraw = () => {
       setWithdrawals(res.data);
     } catch (err) {
       console.error('Error fetching withdrawals:', err);
-      const msg = err.response?.data?.error || err.message;
-      setError(`System Error: ${msg}. Please verify server status.`);
+      const errorMsg = err.response?.data?.error || err.message;
+      const details = err.response?.data?.details ? ` (${err.response.data.details})` : '';
+      setError(`System Error: ${errorMsg}${details}. Please verify server status.`);
     } finally {
       setFetching(false);
     }
