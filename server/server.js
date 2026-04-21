@@ -328,7 +328,7 @@ app.get('/api/admin/setup', async (req, res) => {
         // But since it's already called on module load, we can just return status
         // or trigger a manual scan here if we exported it.
         // For now, let's just use the logic directly for guaranteed execution
-        const { pool } = require('./db'); 
+        const pool = require('./db'); 
         const conn = await pool.getConnection();
         
         // Re-run the core logic to be sure
