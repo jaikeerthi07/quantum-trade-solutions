@@ -124,7 +124,7 @@ app.get('/api/users', async (req, res) => {
         res.json(decryptedRows);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ error: 'Database error', details: err.message });
     }
 });
 
@@ -157,7 +157,7 @@ app.post('/api/investments', async (req, res) => {
         res.status(201).json({ investment_id: result.insertId });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ error: 'Database error', details: err.message });
     }
 });
 
@@ -183,7 +183,7 @@ app.post('/api/confirm', async (req, res) => {
         res.json({ confirmation_id: confirmationId, message: 'Confirmed' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ error: 'Database error', details: err.message });
     }
 });
 
@@ -205,7 +205,7 @@ app.get('/api/receipt/:investment_id', async (req, res) => {
         res.json(rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ error: 'Database error', details: err.message });
     }
 });
 
@@ -260,7 +260,7 @@ app.get('/api/withdrawals', async (req, res) => {
         res.json(rows);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ error: 'Database error', details: err.message });
     }
 });
 
