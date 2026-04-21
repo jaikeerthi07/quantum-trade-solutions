@@ -45,12 +45,23 @@ async function initDB() {
         `);
 
         // Update existing table if columns are missing
-        const columns = ['custom_id', 'email', 'date_of_joining', 'referral_code'];
+        const columns = [
+            { name: 'custom_id', type: 'VARCHAR(100)' },
+            { name: 'email', type: 'VARCHAR(100)' },
+            { name: 'date_of_joining', type: 'DATE' },
+            { name: 'referral_code', type: 'VARCHAR(100)' }
+        ];
+
         for (const col of columns) {
             try {
-                await connection.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col} ${col === 'date_of_joining' ? 'DATE' : 'VARCHAR(100)'}`);
+                // Standard MySQL syntax (IF NOT EXISTS is not supported for columns)
+                await connection.query(`ALTER TABLE users ADD COLUMN ${col.name} ${col.type}`);
+                console.log(`Column ${col.name} added successfully.`);
             } catch (e) {
-                // Ignore if column already exists
+                // Ignore if column already exists (Error 1060)
+                if (e.errno !== 1060) {
+                    console.warn(`Notice: Column ${col.name} could not be added:`, e.message);
+                }
             }
         }
 
