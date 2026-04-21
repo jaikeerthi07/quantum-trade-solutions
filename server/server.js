@@ -320,6 +320,33 @@ app.get('/', (req, res) => {
     res.send('Quantum Trade API is online');
 });
 
+// Temporary migration endpoint to fix cloud DB schema
+app.get('/api/admin/migrate', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const columns = [
+            { name: 'custom_id', type: 'VARCHAR(100)' },
+            { name: 'email', type: 'VARCHAR(100)' },
+            { name: 'date_of_joining', type: 'DATE' },
+            { name: 'referral_code', type: 'VARCHAR(100)' }
+        ];
+
+        let results = [];
+        for (const col of columns) {
+            try {
+                await connection.query(`ALTER TABLE users ADD COLUMN ${col.name} ${col.type}`);
+                results.push(`${col.name}: ADDED`);
+            } catch (e) {
+                results.push(`${col.name}: ${e.message}`);
+            }
+        }
+        connection.release();
+        res.json({ message: 'Migration complete', results });
+    } catch (err) {
+        res.status(500).json({ error: 'Migration failed', details: err.message });
+    }
+});
+
 // For Vercel Serverless Functions
 if (require.main === module) {
     app.listen(PORT, '0.0.0.0', () => {
