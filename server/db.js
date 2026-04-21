@@ -9,20 +9,7 @@ const dbConfig = {
 
 const database = process.env.DB_NAME;
 
-async function setup() {
-    if (!dbConfig.host || !dbConfig.user) {
-        console.warn('DATABASE WARNING: Missing DB configuration. Backend will fail on DB queries.');
-        return;
-    }
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        await connection.query(`CREATE DATABASE IF NOT EXISTS ${database}`);
-        await connection.close();
-    } catch (err) {
-        console.warn('DATABASE NOTICE: Could not create/verify database automatically. Ensure it exists on your host.');
-    }
-}
-
+// Cloud-optimized Pool configuration
 const pool = mysql.createPool({
     ...dbConfig,
     database: database,
@@ -37,7 +24,6 @@ const pool = mysql.createPool({
 async function initDB() {
     if (!dbConfig.host) return;
     try {
-        await setup();
         const connection = await pool.getConnection();
         console.log(`Connected to MySQL database: ${database}`);
 
