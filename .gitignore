@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+dist/
+dist-ssr
+*.local
+
+# Tech-specific
+.env
+.DS_Store
+*.log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
