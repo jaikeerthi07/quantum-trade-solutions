@@ -70,7 +70,9 @@ const DashboardHome = ({ activeView, setActiveView }) => {
       
       setOnboardingStep(4); // Show Step 5 (Receipt)
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to process investment');
+      const errorMsg = err.response?.data?.error || 'Failed to process investment';
+      const details = err.response?.data?.details ? `\nDetails: ${err.response.data.details}` : '';
+      alert(`${errorMsg}${details}`);
     } finally {
       setLoading(false);
     }

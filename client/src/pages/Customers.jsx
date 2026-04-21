@@ -66,7 +66,9 @@ const Customers = ({ onStartOnboarding }) => {
       });
       await fetchCustomers();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to create record');
+      const errorMsg = err.response?.data?.error || 'Failed to create record';
+      const details = err.response?.data?.details ? `\nDetails: ${err.response.data.details}` : '';
+      alert(`${errorMsg}${details}`);
     } finally {
       setLoading(false);
     }
