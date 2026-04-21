@@ -320,6 +320,29 @@ app.get('/', (req, res) => {
     res.send('Quantum Trade API is online');
 });
 
+// Comprehensive setup endpoint to fix ALL cloud DB tables
+app.get('/api/admin/setup', async (req, res) => {
+    try {
+        const { initDB } = require('./db');
+        // We call the initDB function which is already designed to be robust
+        // But since it's already called on module load, we can just return status
+        // or trigger a manual scan here if we exported it.
+        // For now, let's just use the logic directly for guaranteed execution
+        const { pool } = require('./db'); 
+        const conn = await pool.getConnection();
+        
+        // Re-run the core logic to be sure
+        await conn.query(`CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, full_name VARCHAR(100) NOT NULL, mobile VARCHAR(15) NOT NULL UNIQUE, aadhaar TEXT NOT NULL, pan TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+        await conn.query(`CREATE TABLE IF NOT EXISTS investments (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, deposit_amount DECIMAL(12,2) NOT NULL, status ENUM('PENDING', 'CONFIRMED') DEFAULT 'PENDING', confirmation_id VARCHAR(50) UNIQUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
+        await conn.query(`CREATE TABLE IF NOT EXISTS withdrawals (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, transaction_id VARCHAR(50) NOT NULL UNIQUE, currency VARCHAR(10) NOT NULL, amount DECIMAL(12,2) NOT NULL, bank_name VARCHAR(100) NOT NULL, status ENUM('PENDING', 'CONFIRMED', 'REJECTED') DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
+        
+        conn.release();
+        res.json({ message: 'Setup complete. All tables verified.' });
+    } catch (err) {
+        res.status(500).json({ error: 'Setup failed', details: err.message });
+    }
+});
+
 // For Vercel Serverless Functions
 if (require.main === module) {
     app.listen(PORT, '0.0.0.0', () => {

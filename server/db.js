@@ -29,42 +29,36 @@ async function initDB() {
         const connection = await pool.getConnection();
         console.log(`Connected to MySQL database: ${database}`);
 
+        // 1. Users Table
         await connection.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                custom_id VARCHAR(50),
                 full_name VARCHAR(100) NOT NULL,
-                dob DATE,
-                email VARCHAR(100),
                 mobile VARCHAR(15) NOT NULL UNIQUE,
-                aadhaar VARCHAR(255) NOT NULL,
-                pan VARCHAR(255) NOT NULL,
-                date_of_joining DATE,
+                aadhaar TEXT NOT NULL,
+                pan TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
-        // Update existing table if columns are missing
-        const columns = [
+        // Update Users Columns
+        const userCols = [
             { name: 'custom_id', type: 'VARCHAR(100)' },
             { name: 'email', type: 'VARCHAR(100)' },
             { name: 'date_of_joining', type: 'DATE' },
-            { name: 'referral_code', type: 'VARCHAR(100)' }
+            { name: 'referral_code', type: 'VARCHAR(100)' },
+            { name: 'dob', type: 'DATE' }
         ];
 
-        for (const col of columns) {
+        for (const col of userCols) {
             try {
-                // Standard MySQL syntax (IF NOT EXISTS is not supported for columns)
                 await connection.query(`ALTER TABLE users ADD COLUMN ${col.name} ${col.type}`);
-                console.log(`Column ${col.name} added successfully.`);
             } catch (e) {
-                // Ignore if column already exists (Error 1060)
-                if (e.errno !== 1060) {
-                    console.warn(`Notice: Column ${col.name} could not be added:`, e.message);
-                }
+                if (e.errno !== 1060) console.warn(`Notice: Column ${col.name} failed:`, e.message);
             }
         }
 
+        // 2. Investments Table
         await connection.query(`
             CREATE TABLE IF NOT EXISTS investments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -77,11 +71,12 @@ async function initDB() {
             )
         `);
 
+        // 3. Withdrawals Table
         await connection.query(`
             CREATE TABLE IF NOT EXISTS withdrawals (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                transaction_id VARCHAR(50) NOT NULL UNIQUE,
                 user_id INT NOT NULL,
+                transaction_id VARCHAR(50) NOT NULL UNIQUE,
                 currency VARCHAR(10) NOT NULL,
                 amount DECIMAL(12,2) NOT NULL,
                 bank_name VARCHAR(100) NOT NULL,
