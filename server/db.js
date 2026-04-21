@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const dbConfig = {
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
 };
@@ -16,6 +17,7 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    connectTimeout: 10000,
     // Add SSL support for cloud providers (Aiven, Railway, etc.)
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
